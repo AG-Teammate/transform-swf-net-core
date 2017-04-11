@@ -3,6 +3,8 @@
 
 Depends on [ImageSharp](https://github.com/JimBobSquarePants/ImageSharp) and [Iconic.Zlib.Netstandard](https://github.com/HelloKitty/Iconic.Zlib.Netstandard)
 
+The package is available on NuGet https://www.nuget.org/packages/SwfTransform/0.0.1-alpha (Pre-release since ImageSharp is pre-release at the time of publishing)
+
 For original documentation see http://www.flagstonesoftware.com/transform/ and http://www.flagstonesoftware.com/cookbook/index.html
 
 Quick example - replace an image in SWF file:
