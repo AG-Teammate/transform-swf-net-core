@@ -594,7 +594,7 @@ namespace com.flagstone.transform.coder
 
 		public int readInt()
 		{
-			if (size - index < 2)
+			if (size - index < 4)
 			{
 				fill();
 			}
