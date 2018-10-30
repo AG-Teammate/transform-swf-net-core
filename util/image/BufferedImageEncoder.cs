@@ -1,7 +1,9 @@
-﻿using System;
-using com.flagstone.transform.coder;
+﻿using com.flagstone.transform.coder;
 using com.flagstone.transform.image;
-using ImageSharp;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
+using System;
 
 /*
  * BufferedImageEncoder.java
@@ -448,11 +450,11 @@ namespace com.flagstone.transform.util.image
         /// Create a BufferedImage from the decoded Flash image.
         /// </summary>
         /// <returns> a BufferedImage containing the image. </returns>
-        public Image BufferedImage
+        public Image<Rgba32> BufferedImage
         {
             get
             {
-                Image bufferedImage;
+                Image<Rgba32> bufferedImage;
                 if (format == ImageFormat.IDX8 || format == ImageFormat.IDXA)
                 {
                     bufferedImage = IndexedImage;
@@ -469,7 +471,7 @@ namespace com.flagstone.transform.util.image
         /// Return the indexed image as a BufferedImage.
         /// </summary>
         /// <returns> A BufferedImage containing the image data. </returns>
-        private Image IndexedImage
+        private Image<Rgba32> IndexedImage
         {
             get
             {
@@ -503,35 +505,30 @@ namespace com.flagstone.transform.util.image
 
 
 
-                Image bufferedImage = new Image(width, height);
-
-
+                Image<Rgba32> bufferedImage = new Image<Rgba32>(width, height);
 
                 int[] row = new int[width];
                 int color;
                 index = 0;
-                using (var pixels = bufferedImage.Lock())
+                for (int i = 0; i < height; i++)
                 {
-                    for (int i = 0; i < height; i++)
+                    for (int j = 0; j < width; j++, index++)
                     {
-                        for (int j = 0; j < width; j++, index++)
-                        {
-                            color = (image[index] & MASK_8BIT) << 2;
+                        color = (image[index] & MASK_8BIT) << 2;
 
-                            row[j] = (table[color + ALPHA] & MASK_8BIT) << ALIGN_BYTE4;
-                            row[j] = row[j] | ((table[color + 2] & MASK_8BIT) << ALIGN_BYTE3);
-                            row[j] = row[j] | ((table[color + 1] & MASK_8BIT) << ALIGN_BYTE2);
-                            row[j] = row[j] | (table[color + 0] & MASK_8BIT);
+                        row[j] = (table[color + ALPHA] & MASK_8BIT) << ALIGN_BYTE4;
+                        row[j] = row[j] | ((table[color + 2] & MASK_8BIT) << ALIGN_BYTE3);
+                        row[j] = row[j] | ((table[color + 1] & MASK_8BIT) << ALIGN_BYTE2);
+                        row[j] = row[j] | (table[color + 0] & MASK_8BIT);
 
-                            var colorS = new Color((byte)(table[color + 2] & MASK_8BIT),
-                                (byte)(table[color + 1] & MASK_8BIT),
-                                (byte)(table[color + 0] & MASK_8BIT),
-                                (byte)(table[color + ALPHA] & MASK_8BIT));
-                            pixels[j, i] = colorS;
-                        }
-                        ////setRGB(int startX, int startY, int w, int h, int[] rgbArray, int offset, int scansize)
-                        //bufferedImage.setRGB(0, i, width, 1, row, 0, width);
+                        var colorS = new Rgba32((byte)(table[color + 2] & MASK_8BIT),
+                            (byte)(table[color + 1] & MASK_8BIT),
+                            (byte)(table[color + 0] & MASK_8BIT),
+                            (byte)(table[color + ALPHA] & MASK_8BIT));
+                        bufferedImage[j, i] = colorS;
                     }
+                    ////setRGB(int startX, int startY, int w, int h, int[] rgbArray, int offset, int scansize)
+                    //bufferedImage.setRGB(0, i, width, 1, row, 0, width);
                 }
                 return bufferedImage;
             }
@@ -541,39 +538,31 @@ namespace com.flagstone.transform.util.image
         /// Return the 32-bit true-colour image as a BufferedImage.
         /// </summary>
         /// <returns> A BufferedImage containing the image data. </returns>
-        private Image RGBAImage
+        private Image<Rgba32> RGBAImage
         {
             get
             {
-
-
-
-                Image bufferedImage = new Image(width, height);
-
-
+                Image<Rgba32> bufferedImage = new Image<Rgba32>(width, height);
 
                 //int[] buffer = new int[width];
                 int index = 0;
-                using (var pixels = bufferedImage.Lock())
+                for (int i = 0; i < height; i++)
                 {
-                    for (int i = 0; i < height; i++)
+                    for (int j = 0; j < width; j++, index += BYTES_PER_PIXEL)
                     {
-                        for (int j = 0; j < width; j++, index += BYTES_PER_PIXEL)
-                        {
-                            //buffer[j] = (image[index + ALPHA] & MASK_8BIT) << ALIGN_BYTE4;
-                            //buffer[j] = buffer[j] | ((image[index + RED] & MASK_8BIT) << ALIGN_BYTE3);
-                            //buffer[j] = buffer[j] | ((image[index + GREEN] & MASK_8BIT) << ALIGN_BYTE2);
-                            //buffer[j] = buffer[j] | (image[index + BLUE] & MASK_8BIT);
-                            var color = new Color((byte)(image[index + RED] & MASK_8BIT),
-                                (byte)(image[index + GREEN] & MASK_8BIT),
-                                (byte)(image[index + BLUE] & MASK_8BIT),
-                                (byte)(image[index + ALPHA] & MASK_8BIT));
-                            pixels[j, i] = color;
-                        }
-                        //setRGB(int startX, int startY, int w, int h, int[] rgbArray, int offset, int scansize)
-                        //bufferedImage.setRGB(0, i, width, 1, buffer, 0, width);
-
+                        //buffer[j] = (image[index + ALPHA] & MASK_8BIT) << ALIGN_BYTE4;
+                        //buffer[j] = buffer[j] | ((image[index + RED] & MASK_8BIT) << ALIGN_BYTE3);
+                        //buffer[j] = buffer[j] | ((image[index + GREEN] & MASK_8BIT) << ALIGN_BYTE2);
+                        //buffer[j] = buffer[j] | (image[index + BLUE] & MASK_8BIT);
+                        var color = new Rgba32((byte)(image[index + RED] & MASK_8BIT),
+                            (byte)(image[index + GREEN] & MASK_8BIT),
+                            (byte)(image[index + BLUE] & MASK_8BIT),
+                            (byte)(image[index + ALPHA] & MASK_8BIT));
+                        bufferedImage[j, i] = color;
                     }
+                    //setRGB(int startX, int startY, int w, int h, int[] rgbArray, int offset, int scansize)
+                    //bufferedImage.setRGB(0, i, width, 1, buffer, 0, width);
+
                 }
                 return bufferedImage;
             }
@@ -593,9 +582,11 @@ namespace com.flagstone.transform.util.image
 
 
 
-        public Image resizeImage(Image bufferedImg, int imgWidth, int imgHeight)
+        public Image<Rgba32> resizeImage(Image<Rgba32> bufferedImg, int imgWidth, int imgHeight)
         {
-            return (Image)bufferedImg.Resize(imgWidth, imgHeight);
+            var clone = bufferedImg.Clone();
+            bufferedImg.Mutate(i => i.Resize(imgWidth, imgHeight));
+            return clone;
         }
 
         /// <summary>

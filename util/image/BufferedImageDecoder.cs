@@ -34,7 +34,9 @@
 
 using System;
 using System.IO;
-using ImageSharp;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Advanced;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace com.flagstone.transform.util.image
 {
@@ -176,7 +178,7 @@ namespace com.flagstone.transform.util.image
 
         public void read(System.IO.Stream stream)
         {
-            read(ImageSharp.Image.Load(stream));
+            read(SixLabors.ImageSharp.Image.Load(stream));
         }
 
 
@@ -235,7 +237,7 @@ namespace com.flagstone.transform.util.image
 
 
 
-        public ImageTag defineImage(int identifier, Image obj)
+        public ImageTag defineImage(int identifier, Image<Rgba32> obj)
         {
             ImageTag @object = null;
 
@@ -308,11 +310,11 @@ namespace com.flagstone.transform.util.image
 
 
 
-        public void read(Image obj)
+        public void read(Image<Rgba32> obj)
         {
             width = obj.Width;
             height = obj.Height;
-            var pixels = obj.Pixels;
+            var pixels = obj.GetPixelSpan();
 
             format = ImageFormat.RGBA;
             image = new byte[height * width * BYTES_PER_PIXEL];

@@ -29,10 +29,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+using com.flagstone.transform.image;
+using SixLabors.ImageSharp;
 using System;
 using System.IO;
-using com.flagstone.transform.image;
-using ImageSharp;
 
 namespace com.flagstone.transform.util.image
 {
